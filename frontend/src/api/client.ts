@@ -1,69 +1,125 @@
 import axios from 'axios'
-import { Annotation, Stats } from '../types'
+import type { User, Project, Dataset, Task, Annotation, Stats, AnnotationData, AnnotationType } from '../types'
 
 const apiClient = axios.create({
   baseURL: '/api',
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  timeout: 60000,
 })
 
-export const api = {
-  // 健康检查
-  healthCheck: () => apiClient.get('/health'),
+// 请求拦截器 - 添加token
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
 
-  // 上传图片
-  uploadImage: (file: File) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    return apiClient.post('/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+// 响应拦截器 - 处理错误
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
+export const api = {
+  // ==================== 认证 ====================
+  auth: {
+    login: (username: string, password: string) =>
+      apiClient.post<{ success: boolean; token: string; user: User }>('/auth/login', {
+        username,
+        password,
+      }),
+
+    register: (username: string, password: string) =>
+      apiClient.post<{ success: boolean; user: User }>('/auth/register', {
+        username,
+        password,
+      }),
+
+    getCurrentUser: () => apiClient.get<User>('/auth/me'),
   },
 
-  // 上传Base64图片
-  uploadBase64: (imageData: string) =>
-    apiClient.post('/upload-base64', { image: imageData }),
+  // ==================== 项目 ====================
+  projects: {
+    list: () => apiClient.get<Project[]>('/projects'),
 
-  // 获取标注列表
-  getAnnotations: (params?: {
-    page?: number
-    per_page?: number
-    type?: string
-  }) => apiClient.get<{
-    annotations: Annotation[]
-    total: number
-    page: number
-    per_page: number
-  }>('/annotations', { params }),
+    create: (data: {
+      name: string
+      description?: string
+      annotation_type: AnnotationType
+      labels?: string[]
+    }) => apiClient.post<{ success: boolean; project: Project }>('/projects', data),
 
-  // 创建标注
-  createAnnotation: (annotation: Annotation) =>
-    apiClient.post<{ success: boolean; annotation: Annotation }>(
-      '/annotations',
-      annotation
-    ),
+    get: (id: number) => apiClient.get<Project>(`/projects/${id}`),
 
-  // 更新标注
-  updateAnnotation: (id: number, annotation: Partial<Annotation>) =>
-    apiClient.put<{ success: boolean; annotation: Annotation }>(
-      `/annotations/${id}`,
-      annotation
-    ),
+    update: (id: number, data: Partial<Project>) =>
+      apiClient.put<{ success: boolean; project: Project }>(`/projects/${id}`, data),
 
-  // 删除标注
-  deleteAnnotation: (id: number) =>
-    apiClient.delete(`/annotations/${id}`),
+    delete: (id: number) => apiClient.delete(`/projects/${id}`),
+  },
 
-  // 获取统计信息
-  getStats: () => apiClient.get<Stats>('/stats'),
+  // ==================== 数据集 ====================
+  datasets: {
+    upload: (projectId: number, file: File) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      return apiClient.post<{ success: boolean; dataset: Dataset }>(
+        `/projects/${projectId}/datasets`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      )
+    },
 
-  // 导出标注
-  exportAnnotations: (format: string = 'json') =>
-    apiClient.get('/export', { params: { format } })
+    list: (projectId: number) =>
+      apiClient.get<Dataset[]>(`/projects/${projectId}/datasets`),
+
+    get: (id: number) => apiClient.get<Dataset>(`/datasets/${id}`),
+  },
+
+  // ==================== 任务 ====================
+  tasks: {
+    list: (params?: { status?: string; dataset_id?: number }) =>
+      apiClient.get<Task[]>('/tasks', { params }),
+
+    getNext: (datasetId?: number) =>
+      apiClient.get<Task>('/tasks/next', {
+        params: datasetId ? { dataset_id: datasetId } : undefined,
+      }),
+
+    get: (id: number) => apiClient.get<Task>(`/tasks/${id}`),
+
+    getImage: (id: number) => `/api/tasks/${id}/image`,
+  },
+
+  // ==================== 标注 ====================
+  annotations: {
+    create: (taskId: number, data: {
+      annotation_type: AnnotationType
+      data: AnnotationData
+      completed?: boolean
+    }) =>
+      apiClient.post<{ success: boolean; annotation: Annotation }>(
+        `/tasks/${taskId}/annotations`,
+        data
+      ),
+
+    get: (taskId: number) => apiClient.get<Annotation>(`/tasks/${taskId}/annotations`),
+  },
+
+  // ==================== 统计 ====================
+  stats: {
+    get: () => apiClient.get<Stats>('/stats'),
+  },
 }
 
 export default apiClient

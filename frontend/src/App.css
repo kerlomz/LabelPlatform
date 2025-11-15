@@ -18,14 +18,60 @@ body {
 }
 
 .ant-layout {
-  background: #f0f2f5;
+  min-height: 100vh;
 }
 
+/* 优化滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Card优化 */
 .ant-card {
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
+.ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Button优化 */
 .ant-btn {
-  border-radius: 4px;
+  border-radius: 6px;
+}
+
+/* Table优化 */
+.ant-table {
+  background: white;
+  border-radius: 8px;
+}
+
+.ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* Modal优化 */
+.ant-modal-content {
+  border-radius: 8px;
+}
+
+/* 表单项间距 */
+.ant-form-item {
+  margin-bottom: 20px;
 }
