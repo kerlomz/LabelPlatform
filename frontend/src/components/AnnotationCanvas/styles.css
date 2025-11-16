@@ -1,0 +1,152 @@
+.annotation-canvas-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
+.canvas-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+}
+
+.canvas-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.canvas-tools {
+  width: 60px;
+  background: white;
+  border-right: 1px solid #e8e8e8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 8px;
+}
+
+.canvas-stage-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas-sidebar {
+  width: 300px;
+  background: white;
+  border-left: 1px solid #e8e8e8;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.canvas-status-bar {
+  background: #001529;
+  color: white;
+  padding: 8px 20px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.annotation-item-selected {
+  border-left: 3px solid #1890ff;
+}
+
+/* 工具按钮激活状态 */
+.ant-btn-primary {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Canvas区域光标 */
+.canvas-stage-wrapper[data-tool="select"] {
+  cursor: default;
+}
+
+.canvas-stage-wrapper[data-tool="bbox"],
+.canvas-stage-wrapper[data-tool="polygon"] {
+  cursor: crosshair;
+}
+
+.canvas-stage-wrapper[data-tool="pan"] {
+  cursor: grab;
+}
+
+.canvas-stage-wrapper[data-tool="pan"]:active {
+  cursor: grabbing;
+}
+
+/* 滚动条美化 */
+.canvas-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.canvas-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.canvas-sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.canvas-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 响应式 */
+@media (max-width: 1200px) {
+  .canvas-sidebar {
+    width: 250px;
+  }
+}
+
+/* 动画效果 */
+.annotation-item {
+  transition: all 0.2s ease;
+}
+
+.annotation-item:hover {
+  background: #fafafa;
+}
+
+/* 快捷键提示 */
+.canvas-status-bar .ant-tag {
+  margin: 0 2px;
+  font-size: 11px;
+  padding: 0 6px;
+  border: none;
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .annotation-canvas-container {
+    background: #141414;
+  }
+
+  .canvas-toolbar,
+  .canvas-tools,
+  .canvas-sidebar {
+    background: #1f1f1f;
+    border-color: #303030;
+  }
+
+  .canvas-stage-wrapper {
+    background: #0f0f0f;
+  }
+}
