@@ -12,6 +12,13 @@ import {
   Upload,
   Tag,
   Progress,
+  InputNumber,
+  Switch,
+  Descriptions,
+  Statistic,
+  Row,
+  Col,
+  Alert,
 } from 'antd'
 import {
   PlusOutlined,
@@ -19,10 +26,14 @@ import {
   EditOutlined,
   DeleteOutlined,
   FolderOpenOutlined,
+  CheckCircleOutlined,
+  BarChartOutlined,
+  ScissorOutlined,
+  SendOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
-import type { Project, Dataset, AnnotationType } from '../types'
+import type { Project, Dataset, AnnotationType, TaskChunk } from '../types'
 
 const annotationTypeOptions = [
   { label: '文本标注', value: 'text' },
@@ -40,7 +51,10 @@ export const ProjectManagement: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [createModalVisible, setCreateModalVisible] = useState(false)
   const [uploadModalVisible, setUploadModalVisible] = useState(false)
+  const [chunkModalVisible, setChunkModalVisible] = useState(false)
+  const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null)
   const [form] = Form.useForm()
+  const [chunkForm] = Form.useForm()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -80,6 +94,7 @@ export const ProjectManagement: React.FC = () => {
         name: values.name,
         description: values.description,
         annotation_type: values.annotation_type,
+        task_instruction: values.task_instruction,
         labels: values.labels ? values.labels.split(',').map((l: string) => l.trim()) : [],
       })
       message.success('项目创建成功')
@@ -88,6 +103,36 @@ export const ProjectManagement: React.FC = () => {
       loadProjects()
     } catch (error) {
       message.error('创建项目失败')
+    }
+  }
+
+  const handleCreateChunks = async (values: any) => {
+    if (!selectedDataset) return
+
+    try {
+      await api.datasets.createChunks(selectedDataset.id, {
+        chunk_size: values.chunk_size,
+        max_claims_per_user: values.max_claims_per_user,
+        single_claim_only: values.single_claim_only,
+      })
+      message.success('分片创建成功')
+      setChunkModalVisible(false)
+      chunkForm.resetFields()
+      if (selectedProject) {
+        loadDatasets(selectedProject.id)
+      }
+    } catch (error: any) {
+      message.error('创建分片失败: ' + (error.response?.data?.error || error.message))
+    }
+  }
+
+  const handlePublishProject = async (project: Project) => {
+    try {
+      await api.projects.publish(project.id)
+      message.success('项目已发布')
+      loadProjects()
+    } catch (error: any) {
+      message.error('发布失败: ' + (error.response?.data?.error || error.message))
     }
   }
 
@@ -136,6 +181,21 @@ export const ProjectManagement: React.FC = () => {
       key: 'name',
     },
     {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => {
+        const statusMap: any = {
+          draft: { color: 'default', text: '草稿' },
+          published: { color: 'success', text: '已发布' },
+          completed: { color: 'processing', text: '已完成' },
+          archived: { color: 'default', text: '已归档' },
+        }
+        const { color, text } = statusMap[status] || {}
+        return <Tag color={color}>{text}</Tag>
+      },
+    },
+    {
       title: '标注类型',
       dataIndex: 'annotation_type',
       key: 'annotation_type',
@@ -145,28 +205,20 @@ export const ProjectManagement: React.FC = () => {
       },
     },
     {
-      title: '标签',
-      dataIndex: 'labels',
-      key: 'labels',
-      render: (labels: string[]) => (
-        <Space size={[0, 4]} wrap>
-          {labels.slice(0, 3).map((label) => (
-            <Tag key={label}>{label}</Tag>
-          ))}
-          {labels.length > 3 && <Tag>+{labels.length - 3}</Tag>}
+      title: '进度',
+      key: 'progress',
+      render: (_: any, record: Project) => (
+        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <div style={{ fontSize: 12, color: '#666' }}>
+            {record.stats?.completed_tasks || 0} / {record.stats?.total_tasks || 0}
+          </div>
+          <Progress
+            percent={record.stats?.progress || 0}
+            size="small"
+            showInfo={false}
+          />
         </Space>
       ),
-    },
-    {
-      title: '数据集数量',
-      dataIndex: 'dataset_count',
-      key: 'dataset_count',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (date: string) => new Date(date).toLocaleString('zh-CN'),
     },
     {
       title: '操作',
@@ -178,8 +230,17 @@ export const ProjectManagement: React.FC = () => {
             icon={<FolderOpenOutlined />}
             onClick={() => setSelectedProject(record)}
           >
-            查看
+            管理
           </Button>
+          {record.status === 'draft' && (
+            <Button
+              type="link"
+              icon={<SendOutlined />}
+              onClick={() => handlePublishProject(record)}
+            >
+              发布
+            </Button>
+          )}
           <Button
             type="link"
             danger
@@ -220,22 +281,49 @@ export const ProjectManagement: React.FC = () => {
       key: 'total_images',
     },
     {
-      title: '完成进度',
-      dataIndex: 'progress',
-      key: 'progress',
-      render: (progress: number) => <Progress percent={Math.round(progress)} size="small" />,
+      title: '分片信息',
+      key: 'chunks',
+      render: (_: any, record: Dataset) => (
+        <Space direction="vertical" size="small">
+          <div>
+            分片数: {record.total_chunks || 0}
+            {record.total_chunks > 0 && (
+              <Tag color="green" style={{ marginLeft: 8 }}>
+                可用: {record.available_chunks}
+              </Tag>
+            )}
+          </div>
+          {record.chunk_size > 0 && (
+            <div style={{ fontSize: 12, color: '#666' }}>
+              每片 {record.chunk_size} 任务 |
+              每人最多 {record.max_claims_per_user} 片
+              {record.single_claim_only && ' | 独占模式'}
+            </div>
+          )}
+        </Space>
+      ),
     },
     {
       title: '操作',
       key: 'actions',
       render: (_: any, record: Dataset) => (
-        <Button
-          type="primary"
-          onClick={() => navigate(`/annotate?dataset=${record.id}`)}
-          disabled={record.status !== 'ready'}
-        >
-          开始标注
-        </Button>
+        <Space direction="vertical" size="small">
+          <Button
+            icon={<ScissorOutlined />}
+            onClick={() => {
+              setSelectedDataset(record)
+              setChunkModalVisible(true)
+              chunkForm.setFieldsValue({
+                chunk_size: record.chunk_size || 100,
+                max_claims_per_user: record.max_claims_per_user || 1,
+                single_claim_only: record.single_claim_only || false,
+              })
+            }}
+            disabled={record.status !== 'ready'}
+          >
+            {record.total_chunks > 0 ? '重新分片' : '创建分片'}
+          </Button>
+        </Space>
       ),
     },
   ]
@@ -323,6 +411,79 @@ export const ProjectManagement: React.FC = () => {
           >
             <Input placeholder="标签1, 标签2, 标签3" />
           </Form.Item>
+
+          <Form.Item
+            name="task_instruction"
+            label="标注说明"
+            extra="向标注者说明标注注意事项和要求"
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="例如: 请在验证码图片中框选出所有数字和字母，确保边框紧贴文字..."
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 创建分片模态框 */}
+      <Modal
+        title="创建任务分片"
+        open={chunkModalVisible}
+        onCancel={() => {
+          setChunkModalVisible(false)
+          chunkForm.resetFields()
+        }}
+        onOk={() => chunkForm.submit()}
+        width={600}
+      >
+        <Form form={chunkForm} layout="vertical" onFinish={handleCreateChunks}>
+          <Descriptions column={1} bordered size="small" style={{ marginBottom: 16 }}>
+            <Descriptions.Item label="数据集">{selectedDataset?.name}</Descriptions.Item>
+            <Descriptions.Item label="总任务数">{selectedDataset?.total_images}</Descriptions.Item>
+          </Descriptions>
+
+          <Form.Item
+            name="chunk_size"
+            label="每个分片的任务数"
+            rules={[{ required: true, message: '请输入分片大小' }]}
+            extra="将数据集自动分割成多个分片，每个分片包含指定数量的任务"
+          >
+            <InputNumber min={1} max={1000} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="max_claims_per_user"
+            label="每人最多领取分片数"
+            rules={[{ required: true, message: '请输入最大领取数' }]}
+            extra="限制单个用户在该数据集中最多可以领取多少个分片"
+          >
+            <InputNumber min={1} max={100} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="single_claim_only"
+            label="独占模式"
+            valuePropName="checked"
+            extra="开启后，每个分片只能被一个用户领取（提高标注效率）"
+          >
+            <Switch />
+          </Form.Item>
+
+          {selectedDataset && chunkForm.getFieldValue('chunk_size') && (
+            <Alert
+              message="预览"
+              description={
+                <div>
+                  将创建约{' '}
+                  <strong>
+                    {Math.ceil(selectedDataset.total_images / chunkForm.getFieldValue('chunk_size'))}
+                  </strong>{' '}
+                  个分片
+                </div>
+              }
+              type="info"
+            />
+          )}
         </Form>
       </Modal>
 

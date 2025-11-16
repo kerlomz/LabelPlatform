@@ -1,113 +1,105 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Button, message, Empty, Spin, Space, Tag } from 'antd'
+import { Card, Button, message, Empty, Spin, Space, Tag, Alert } from 'antd'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { ArrowLeftOutlined, CheckOutlined, ArrowRightOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, InfoCircleOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import { api } from '../api/client'
 import { BBoxEditor } from '../components/BBoxEditor'
 import { PolygonEditor } from '../components/PolygonEditor'
-import type { Task, Annotation, AnnotationType, Dataset } from '../types'
+import type { Task, Project, TaskChunk, TaskChunkClaim } from '../types'
 
 export const AnnotationWorkspace: React.FC = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const datasetId = searchParams.get('dataset')
+  const claimId = searchParams.get('claim_id')
 
   const [currentTask, setCurrentTask] = useState<Task | null>(null)
-  const [annotation, setAnnotation] = useState<Annotation | null>(null)
+  const [project, setProject] = useState<Project | null>(null)
+  const [chunk, setChunk] = useState<TaskChunk | null>(null)
+  const [claim, setClaim] = useState<TaskChunkClaim | null>(null)
+  const [remainingTasks, setRemainingTasks] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [dataset, setDataset] = useState<Dataset | null>(null)
+  const [startTime, setStartTime] = useState<number>(Date.now())
 
   useEffect(() => {
-    if (datasetId) {
-      loadDataset(parseInt(datasetId))
+    if (claimId) {
       loadNextTask()
+    } else {
+      message.error('缺少领取ID参数')
+      navigate('/my-claims')
     }
-  }, [datasetId])
-
-  const loadDataset = async (id: number) => {
-    try {
-      const response = await api.datasets.get(id)
-      setDataset(response.data)
-    } catch (error) {
-      message.error('加载数据集失败')
-    }
-  }
+  }, [claimId])
 
   const loadNextTask = async () => {
-    if (!datasetId) return
+    if (!claimId) return
 
     setLoading(true)
     try {
-      const response = await api.tasks.getNext(parseInt(datasetId))
-      setCurrentTask(response.data)
-
-      // 加载现有标注
-      try {
-        const annResponse = await api.annotations.get(response.data.id)
-        setAnnotation(annResponse.data)
-      } catch (error) {
-        setAnnotation(null)
-      }
+      const response = await api.tasks.getNextInClaim(parseInt(claimId))
+      setCurrentTask(response.data.task)
+      setProject(response.data.project)
+      setChunk(response.data.chunk)
+      setClaim(response.data.claim)
+      setRemainingTasks(response.data.remaining_tasks)
+      setStartTime(Date.now())
     } catch (error: any) {
       if (error.response?.status === 404) {
-        message.info('没有更多任务了')
-        setCurrentTask(null)
+        message.success('该分片的所有任务已完成！')
+        navigate('/my-claims')
       } else {
-        message.error('加载任务失败')
+        message.error('加载任务失败: ' + (error.response?.data?.message || error.message))
       }
+      setCurrentTask(null)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSave = async (data: any, completed: boolean = false) => {
-    if (!currentTask) return
+  const handleSave = async (data: any) => {
+    if (!currentTask || !project) return
+
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000) // 秒
 
     try {
-      await api.annotations.create(currentTask.id, {
-        annotation_type: getAnnotationType(),
+      await api.tasks.submitAnnotation(currentTask.id, {
+        annotation_type: project.annotation_type,
         data,
-        completed,
+        time_spent: timeSpent,
       })
 
-      if (completed) {
-        message.success('标注已完成')
+      message.success(`标注已完成 (用时 ${timeSpent}秒)`)
+
+      // 加载下一个任务
+      setTimeout(() => {
         loadNextTask()
-      } else {
-        message.success('保存成功')
-      }
-    } catch (error) {
-      message.error('保存失败')
+      }, 500)
+    } catch (error: any) {
+      message.error('保存失败: ' + (error.response?.data?.error || error.message))
     }
   }
 
   const handleSkip = () => {
+    // 跳过当前任务，但不提交标注
     loadNextTask()
   }
 
-  const getAnnotationType = (): AnnotationType => {
-    // 从数据集或项目获取标注类型
-    return 'bbox' // 简化处理，实际应从项目配置获取
-  }
-
   const renderEditor = () => {
-    if (!currentTask) return null
+    if (!currentTask || !project) return null
 
     const imageUrl = api.tasks.getImage(currentTask.id)
-    const labels = ['验证码', '滑块', '拼图', '文字'] // 应从项目配置获取
+    const labels = project.labels || []
 
     // 根据标注类型渲染对应的编辑器
-    const annotationType = getAnnotationType()
+    const annotationType = project.annotation_type
 
     switch (annotationType) {
       case 'bbox':
         return (
           <BBoxEditor
             imageUrl={imageUrl}
-            initialBBoxes={annotation?.data?.bboxes || []}
+            initialBBoxes={[]}
             labels={labels}
-            onSave={(bboxes) => handleSave({ bboxes }, true)}
-            onCancel={() => navigate('/admin/projects')}
+            onSave={(bboxes) => handleSave({ bboxes })}
+            onCancel={() => navigate('/my-claims')}
           />
         )
 
@@ -115,16 +107,16 @@ export const AnnotationWorkspace: React.FC = () => {
         return (
           <PolygonEditor
             imageUrl={imageUrl}
-            initialPolygons={annotation?.data?.polygons || []}
+            initialPolygons={[]}
             labels={labels}
-            onSave={(polygons) => handleSave({ polygons }, true)}
-            onCancel={() => navigate('/admin/projects')}
+            onSave={(polygons) => handleSave({ polygons })}
+            onCancel={() => navigate('/my-claims')}
           />
         )
 
       // 其他类型的编辑器...
       default:
-        return <Empty description="不支持的标注类型" />
+        return <Empty description={`暂不支持 ${annotationType} 类型的标注`} />
     }
   }
 
@@ -144,12 +136,12 @@ export const AnnotationWorkspace: React.FC = () => {
             description={
               <div>
                 <p style={{ fontSize: 18, marginBottom: 16 }}>
-                  {dataset
-                    ? `数据集 "${dataset.name}" 的所有任务已完成！`
+                  {chunk
+                    ? `分片 "${chunk.name}" 的所有任务已完成！`
                     : '没有可标注的任务'}
                 </p>
-                <Button type="primary" onClick={() => navigate('/admin/projects')}>
-                  返回项目列表
+                <Button type="primary" onClick={() => navigate('/my-claims')}>
+                  返回我的任务
                 </Button>
               </div>
             }
@@ -176,19 +168,22 @@ export const AnnotationWorkspace: React.FC = () => {
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/admin/projects')}
+            onClick={() => navigate('/my-claims')}
             style={{ color: 'white' }}
           >
             返回
           </Button>
           <span style={{ fontSize: 16 }}>
-            {dataset?.name} - {currentTask.image_name}
+            {project?.name} - {chunk?.name}
           </span>
-          {dataset && (
+          {claim && (
             <Tag color="blue">
-              进度: {dataset.completed_tasks}/{dataset.total_images}
+              进度: {claim.completed_tasks}/{chunk?.task_count}
             </Tag>
           )}
+          <Tag color="orange">
+            剩余: {remainingTasks + 1} 任务
+          </Tag>
         </Space>
 
         <Space>
@@ -197,6 +192,22 @@ export const AnnotationWorkspace: React.FC = () => {
           </Button>
         </Space>
       </div>
+
+      {/* 任务说明 */}
+      {project?.task_instruction && (
+        <Alert
+          message="标注说明"
+          description={
+            <div style={{ whiteSpace: 'pre-wrap' }}>
+              {project.task_instruction}
+            </div>
+          }
+          type="info"
+          icon={<InfoCircleOutlined />}
+          closable
+          style={{ margin: '16px 24px 0' }}
+        />
+      )}
 
       {/* 编辑器 */}
       <div style={{ flex: 1, overflow: 'hidden' }}>

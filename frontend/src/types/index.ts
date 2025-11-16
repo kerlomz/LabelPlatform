@@ -29,11 +29,21 @@ export interface Project {
   name: string
   description: string
   annotation_type: AnnotationType
+  task_instruction?: string
   labels: string[]
-  owner: User
+  creator: User
+  status: 'draft' | 'published' | 'completed' | 'archived'
   created_at: string
   updated_at: string
-  dataset_count: number
+  stats?: {
+    total_datasets: number
+    total_tasks: number
+    total_chunks: number
+    claimed_chunks: number
+    completed_tasks: number
+    progress: number
+  }
+  available_chunks?: TaskChunk[]
 }
 
 // ==================== 数据集相关 ====================
@@ -44,9 +54,40 @@ export interface Dataset {
   project_id: number
   status: 'uploading' | 'processing' | 'ready' | 'error'
   total_images: number
-  completed_tasks: number
+  chunk_size: number
+  max_claims_per_user: number
+  single_claim_only: boolean
+  total_chunks: number
+  available_chunks: number
+  created_at: string
+  chunks?: TaskChunk[]
+}
+
+export interface TaskChunk {
+  id: number
+  dataset_id: number
+  chunk_index: number
+  name: string
+  task_count: number
+  is_available: boolean
+  claim_count: number
   progress: number
   created_at: string
+  user_claimed?: boolean
+  can_claim?: boolean
+}
+
+export interface TaskChunkClaim {
+  id: number
+  chunk: TaskChunk
+  user: User
+  status: 'claimed' | 'in_progress' | 'completed'
+  claimed_at: string
+  started_at?: string
+  completed_at?: string
+  completed_tasks: number
+  total_time_spent: number
+  progress: number
 }
 
 // ==================== 任务相关 ====================
@@ -54,12 +95,12 @@ export interface Dataset {
 export interface Task {
   id: number
   dataset_id: number
+  chunk_index?: number
   image_path: string
   image_name: string
+  task_index: number
   status: 'pending' | 'in_progress' | 'completed' | 'reviewed'
-  annotator: User | null
-  assigned_at: string | null
-  completed_at: string | null
+  created_at: string
   has_annotation: boolean
 }
 

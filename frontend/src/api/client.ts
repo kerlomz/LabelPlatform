@@ -1,5 +1,8 @@
 import axios from 'axios'
-import type { User, Project, Dataset, Task, Annotation, Stats, AnnotationData, AnnotationType } from '../types'
+import type {
+  User, Project, Dataset, Task, Annotation, Stats,
+  AnnotationData, AnnotationType, TaskChunk, TaskChunkClaim
+} from '../types'
 
 const apiClient = axios.create({
   baseURL: '/api',
@@ -53,6 +56,7 @@ export const api = {
       name: string
       description?: string
       annotation_type: AnnotationType
+      task_instruction?: string
       labels?: string[]
     }) => apiClient.post<{ success: boolean; project: Project }>('/projects', data),
 
@@ -62,6 +66,15 @@ export const api = {
       apiClient.put<{ success: boolean; project: Project }>(`/projects/${id}`, data),
 
     delete: (id: number) => apiClient.delete(`/projects/${id}`),
+
+    publish: (id: number) =>
+      apiClient.post<{ success: boolean; project: Project }>(`/projects/${id}/publish`),
+
+    getStatistics: (id: number) =>
+      apiClient.get(`/tasks/projects/${id}/statistics`),
+
+    getAnnotations: (id: number) =>
+      apiClient.get(`/tasks/projects/${id}/annotations`),
   },
 
   // ==================== 数据集 ====================
@@ -84,6 +97,18 @@ export const api = {
       apiClient.get<Dataset[]>(`/projects/${projectId}/datasets`),
 
     get: (id: number) => apiClient.get<Dataset>(`/datasets/${id}`),
+
+    createChunks: (datasetId: number, data: {
+      chunk_size?: number
+      max_claims_per_user?: number
+      single_claim_only?: boolean
+    }) => apiClient.post<{ success: boolean; total_chunks: number; chunks: TaskChunk[] }>(
+      `/tasks/datasets/${datasetId}/create-chunks`,
+      data
+    ),
+
+    getChunks: (datasetId: number) =>
+      apiClient.get<{ dataset: Dataset; chunks: TaskChunk[] }>(`/tasks/datasets/${datasetId}/chunks`),
   },
 
   // ==================== 任务 ====================
@@ -98,7 +123,37 @@ export const api = {
 
     get: (id: number) => apiClient.get<Task>(`/tasks/${id}`),
 
-    getImage: (id: number) => `/api/tasks/${id}/image`,
+    getImage: (taskId: number) => `/api/projects/tasks/${taskId}/image`,
+
+    // 任务广场
+    getMarket: () => apiClient.get<Project[]>('/tasks/task-market'),
+
+    // 领取分片
+    claimChunk: (chunkId: number) =>
+      apiClient.post<{ success: boolean; claim: TaskChunkClaim }>(`/tasks/chunks/${chunkId}/claim`),
+
+    // 我的领取
+    getMyClaims: () => apiClient.get<TaskChunkClaim[]>('/tasks/my-claims'),
+
+    // 获取下一个任务
+    getNextInClaim: (claimId: number) =>
+      apiClient.get<{
+        task: Task
+        project: Project
+        chunk: TaskChunk
+        claim: TaskChunkClaim
+        remaining_tasks: number
+      }>(`/tasks/claims/${claimId}/next-task`),
+
+    // 提交标注
+    submitAnnotation: (taskId: number, data: {
+      annotation_type: AnnotationType
+      data: AnnotationData
+      time_spent?: number
+    }) => apiClient.post<{ success: boolean; annotation: Annotation }>(
+      `/tasks/tasks/${taskId}/submit-annotation`,
+      data
+    ),
   },
 
   // ==================== 标注 ====================
