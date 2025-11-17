@@ -1,0 +1,357 @@
+.my-claims-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding-bottom: 40px;
+}
+
+/* 头部横幅 */
+.claims-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 48px 24px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.claims-header .header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.claims-header .header-title {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.claims-header .header-icon {
+  font-size: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.claims-header .header-title h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+}
+
+.claims-header .header-title p {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 统计概览区域 */
+.claims-stats-section {
+  max-width: 1400px;
+  margin: -32px auto 24px;
+  padding: 0 24px;
+}
+
+.stat-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card .ant-statistic-title {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+.stat-card .ant-statistic-content {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.stat-detail {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #999;
+}
+
+/* 内容区域 */
+.claims-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* 空状态 */
+.empty-state {
+  margin-top: 24px;
+  padding: 60px 24px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+/* 任务卡片 */
+.claim-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+
+.claim-card:not(.completed):hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  border-color: #1890ff;
+}
+
+.claim-card.completed {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  border-color: #91d5ff;
+  opacity: 0.9;
+}
+
+.claim-card .ant-card-body {
+  flex: 1;
+}
+
+.claim-card .ant-card-actions {
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+.claim-card .ant-card-actions > li {
+  margin: 8px 0;
+}
+
+/* 卡片头部 */
+.claim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* 分片标题 */
+.claim-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #262626;
+  margin: 8px 0;
+  min-height: 50px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 进度区域 */
+.claim-progress-section {
+  margin: 16px 0;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-label {
+  font-size: 13px;
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.progress-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #262626;
+}
+
+.progress-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+/* 统计信息 */
+.claim-stats {
+  margin: 16px 0;
+}
+
+.claim-stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.claim-stats .stat-item:hover {
+  background: #f0f0f0;
+}
+
+.claim-stats .stat-icon {
+  font-size: 24px;
+  color: #1890ff;
+}
+
+.claim-stats .stat-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #262626;
+  line-height: 1.2;
+}
+
+.claim-stats .stat-label {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 2px;
+}
+
+/* 时间线 */
+.claim-timeline {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #e8e8e8;
+}
+
+.timeline-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-label {
+  color: #8c8c8c;
+}
+
+.timeline-value {
+  color: #262626;
+  font-weight: 500;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .claims-header {
+    padding: 32px 16px;
+  }
+
+  .claims-header .header-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .claims-header .header-icon {
+    font-size: 36px;
+    padding: 16px;
+  }
+
+  .claims-header .header-title h1 {
+    font-size: 24px;
+  }
+
+  .claims-stats-section {
+    margin-top: -16px;
+    padding: 0 16px;
+  }
+
+  .claims-content {
+    padding: 0 16px;
+  }
+
+  .claim-title {
+    font-size: 16px;
+    min-height: auto;
+  }
+
+  .claim-stats .stat-item {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .claim-stats .stat-icon {
+    font-size: 20px;
+  }
+
+  .claim-stats .stat-value {
+    font-size: 14px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.claim-card {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* 进度条动画 */
+.ant-progress-line {
+  transition: all 0.3s ease;
+}
+
+.ant-progress-bg {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 成功状态特效 */
+.claim-card.completed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 60px 60px 0;
+  border-color: transparent #52c41a transparent transparent;
+  z-index: 1;
+}
+
+.claim-card.completed::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 2;
+}

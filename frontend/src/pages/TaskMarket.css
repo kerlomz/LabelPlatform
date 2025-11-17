@@ -1,0 +1,442 @@
+.task-market-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding-bottom: 40px;
+}
+
+/* 头部横幅 */
+.market-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 48px 24px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-icon {
+  font-size: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.header-title h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+}
+
+.header-title p {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.header-stats {
+  display: flex;
+  gap: 48px;
+}
+
+.header-stats .ant-statistic {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 16px 32px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.header-stats .ant-statistic-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 14px;
+}
+
+.header-stats .ant-statistic-content {
+  color: white !important;
+}
+
+/* 内容区域 */
+.market-content {
+  max-width: 1400px;
+  margin: -24px auto 0;
+  padding: 0 24px;
+}
+
+/* 空状态 */
+.empty-state {
+  margin-top: 24px;
+  padding: 60px 24px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 项目卡片 */
+.project-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.project-card .ant-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card .ant-card-actions {
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+.project-card .ant-card-actions > li {
+  margin: 8px 0;
+}
+
+/* 项目头部 */
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.project-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.type-icon {
+  font-size: 18px;
+}
+
+.type-label {
+  font-weight: 500;
+}
+
+/* 项目标题 */
+.project-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #262626;
+  margin: 12px 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+/* 项目描述 */
+.project-description {
+  color: #8c8c8c;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 63px;
+  flex: 1;
+}
+
+/* 统计信息 */
+.project-stats {
+  margin: 16px 0;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 8px 0;
+  transition: transform 0.2s;
+}
+
+.stat-item:hover {
+  transform: scale(1.05);
+}
+
+.stat-icon {
+  font-size: 24px;
+  color: #1890ff;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #262626;
+  margin: 4px 0;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+/* 分片预览 */
+.chunks-preview {
+  margin-top: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.chunks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+.chunk-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  transition: all 0.2s;
+}
+
+.chunk-item:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+}
+
+.chunk-item.claimed {
+  background: #f0f5ff;
+  border-color: #91d5ff;
+}
+
+.chunk-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.chunk-count {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.view-all-link {
+  margin-top: 12px;
+  text-align: center;
+  color: #1890ff;
+  cursor: pointer;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.view-all-link:hover {
+  color: #40a9ff;
+  text-decoration: underline;
+}
+
+/* 模态框样式 */
+.project-detail-modal .ant-modal-content {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.project-detail-modal .ant-modal-body {
+  padding: 0;
+}
+
+.modal-content {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 32px;
+  color: white;
+}
+
+.modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.modal-type-badge {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.modal-title-section h2 {
+  margin: 0 0 8px;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.modal-content > div:not(.modal-header) {
+  padding: 24px 32px;
+}
+
+.instruction-card {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+}
+
+.instruction-card h4 {
+  margin: 0 0 12px;
+  color: #ad6800;
+}
+
+/* 模态框分片项 */
+.modal-chunk-item {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  transition: all 0.2s;
+}
+
+.modal-chunk-item:hover {
+  border-color: #1890ff;
+  background: white;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+}
+
+.modal-chunk-item .chunk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-chunk-item .chunk-details {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+.modal-chunk-item .chunk-action {
+  margin-top: 12px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .market-header {
+    padding: 32px 16px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-icon {
+    font-size: 36px;
+    padding: 16px;
+  }
+
+  .header-title h1 {
+    font-size: 24px;
+  }
+
+  .header-stats {
+    width: 100%;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .market-content {
+    margin-top: -16px;
+    padding: 0 16px;
+  }
+
+  .modal-content > div:not(.modal-header) {
+    padding: 16px;
+  }
+
+  .modal-header {
+    padding: 24px 16px;
+  }
+
+  .modal-title-section {
+    gap: 16px;
+  }
+
+  .modal-type-badge {
+    width: 60px;
+    height: 60px;
+  }
+
+  .modal-title-section h2 {
+    font-size: 20px;
+  }
+}
+
+/* 加载动画 */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.ant-skeleton {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+}
